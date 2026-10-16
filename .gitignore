@@ -1,0 +1,6 @@
+entries/*/draft.json
+entries/*/draft.txt
+entries/*/source.json
+__pycache__/
+*.wav
+.DS_Store
