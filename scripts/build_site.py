@@ -7,6 +7,7 @@
 
 輸出：
   index.html                     總站：條目列表、主題標籤、全文搜尋
+                                 META["standalone"]=True 的條目照樣列在總站，但自己的頁面不放回總站的連結
   events/<slug>/index.html       重點整理
   transcripts/<slug>/index.html  完整逐字稿
   content/<slug>.json            build 結果紀錄（已去識別化，頁面不讀）
@@ -148,6 +149,16 @@ def render_cheatsheet(sheet: dict) -> str:
     </section>"""
 
 
+def back_link(data: dict) -> str:
+    """獨立頁面：拿到單頁連結的人看不到回總站的按鈕。"""
+    return "" if data.get("standalone") else '<a class="back" href="../../">← 回知識庫</a>'
+
+
+def footer(data: dict) -> str:
+    label = "私有連結" if data.get("standalone") else f"{SITE_TITLE} · 私有連結"
+    return f'<footer class="footer">{e(label)} · 未開放搜尋引擎收錄</footer>'
+
+
 def render_summary(data: dict) -> str:
     slug = data["slug"]
     overview = "".join(f"<li>{rich(i)}</li>" for i in data["overview"])
@@ -176,7 +187,7 @@ def render_summary(data: dict) -> str:
 <body>
   <header class="hero">
     <div class="shell">
-      <a class="back" href="../../">← 回知識庫</a>
+      {back_link(data)}
       <p class="eyebrow">{e(data["eyebrow"])}</p>
       <h1>{e(data["title"])}</h1>
       <p class="lead">{e(data["subtitle"])}</p>
@@ -204,7 +215,7 @@ def render_summary(data: dict) -> str:
     </section>
   </main>
   <a class="to-top" href="#toc">目錄</a>
-  <footer class="footer">{e(SITE_TITLE)} · 私有連結 · 未開放搜尋引擎收錄</footer>
+  {footer(data)}
 </body>
 </html>
 """
@@ -231,7 +242,7 @@ def render_transcript(data: dict) -> str:
     return f"""{head("完整逐字稿｜" + data["title"], data["subtitle"], "../../")}
 <body>
   <main class="shell transcript-page">
-    <a class="back" href="../../">← 回知識庫</a>
+    {back_link(data)}
     <p class="eyebrow">{e(data["eyebrow"])} · Full Transcript</p>
     <h1>{e(data["title"])}｜完整逐字稿</h1>
     <p class="lead">{e(data["transcriptLead"])}</p>
@@ -243,7 +254,7 @@ def render_transcript(data: dict) -> str:
     {"".join(chapters)}
   </main>
   <a class="to-top" href="#toc">目錄</a>
-  <footer class="footer">{e(SITE_TITLE)} · 私有連結 · 未開放搜尋引擎收錄</footer>
+  {footer(data)}
 </body>
 </html>
 """
