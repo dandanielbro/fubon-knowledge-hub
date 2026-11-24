@@ -131,34 +131,6 @@ def toc(data: dict) -> str:
     )
 
 
-def side_toc(data: dict) -> str:
-    """逐字稿側欄：精簡版目錄（章號、標題、時間）。"""
-    return "\n".join(
-        f'<a class="side-link" href="#{s["id"]}"><b>{s["index"]}</b>'
-        f'<span>{e(s["title"])}<small>{e(s["timeRange"])}</small></span></a>'
-        for s in data["sections"]
-    )
-
-
-# 側欄的小功能（沒有 JS 也能用：手機版靠 :target 開關）：標出目前讀到的章節、點空白處關閉
-SIDEBAR_JS = """(function(){
-var bar=document.getElementById('toc');if(!bar)return;
-var links=[].slice.call(bar.querySelectorAll('.side-link'));
-function close(){if(location.hash==='#toc')history.replaceState(null,'',location.pathname);bar.classList.remove('open');}
-document.querySelector('.toc-toggle').addEventListener('click',function(ev){ev.preventDefault();bar.classList.add('open');});
-bar.querySelector('.tsidebar-close').addEventListener('click',function(ev){ev.preventDefault();close();});
-links.forEach(function(a){a.addEventListener('click',function(){bar.classList.remove('open');});});
-document.addEventListener('click',function(ev){if(bar.classList.contains('open')&&!bar.contains(ev.target)&&!ev.target.closest('.toc-toggle'))close();});
-if(!('IntersectionObserver' in window))return;
-var map={};links.forEach(function(a){map[a.getAttribute('href').slice(1)]=a;});
-var io=new IntersectionObserver(function(es){es.forEach(function(en){if(!en.isIntersecting)return;
-links.forEach(function(a){a.classList.remove('on');});var a=map[en.target.id];if(a){a.classList.add('on');
-if(getComputedStyle(bar).position==='sticky'){var r=a.getBoundingClientRect(),b=bar.getBoundingClientRect();if(r.top<b.top+60||r.bottom>b.bottom-20)bar.scrollTop+=r.top-b.top-bar.clientHeight/3;}}});},
-{rootMargin:'-20% 0px -70% 0px'});
-document.querySelectorAll('.tchapter').forEach(function(c){io.observe(c);});
-})();"""
-
-
 def render_cheatsheet(sheet: dict) -> str:
     cols = sheet["columns"]
     header = "".join(f"<th scope=\"col\">{e(c)}</th>" for c in cols)
@@ -269,26 +241,20 @@ def render_transcript(data: dict) -> str:
 </article>""")
     return f"""{head("完整逐字稿｜" + data["title"], data["subtitle"], "../../")}
 <body>
-  <div class="tlayout">
-    <aside class="tsidebar" id="toc" aria-label="逐字稿目錄">
-      <div class="tsidebar-head">
-        <strong>逐字稿目錄</strong>
-        <a class="tsidebar-close" href="#_" aria-label="關閉目錄">✕</a>
-      </div>
-      <nav class="side-list">{side_toc(data)}</nav>
-    </aside>
-    <main class="transcript-page">
-      {back_link(data)}
-      <p class="eyebrow">{e(data["eyebrow"])} · Full Transcript</p>
-      <h1>{e(data["title"])}｜完整逐字稿</h1>
-      <p class="lead">{e(data["transcriptLead"])}</p>
-      <div class="actions"><a class="button primary" href="{target}">查看重點整理</a></div>
-      {"".join(chapters)}
-    </main>
-  </div>
-  <a class="to-top toc-toggle" href="#toc">目錄</a>
+  <main class="shell transcript-page">
+    {back_link(data)}
+    <p class="eyebrow">{e(data["eyebrow"])} · Full Transcript</p>
+    <h1>{e(data["title"])}｜完整逐字稿</h1>
+    <p class="lead">{e(data["transcriptLead"])}</p>
+    <div class="actions"><a class="button primary" href="{target}">查看重點整理</a></div>
+    <nav class="card panel" id="toc" aria-label="逐字稿目錄">
+      <h2>逐字稿目錄</h2>
+      <div class="toc-list">{toc(data)}</div>
+    </nav>
+    {"".join(chapters)}
+  </main>
+  <a class="to-top" href="#toc">目錄</a>
   {footer(data)}
-  <script>{SIDEBAR_JS}</script>
 </body>
 </html>
 """
