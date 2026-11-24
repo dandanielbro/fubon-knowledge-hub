@@ -38,7 +38,7 @@ def join(a: str, b: str) -> str:
 
 
 def load(path: Path, part: str) -> list[dict]:
-    raw = json.loads(path.read_text(encoding="utf-8"))
+    raw = json.loads(path.read_bytes().decode("utf-8", errors="replace").replace("\ufffd", ""))
     paragraphs: list[dict] = []
     for item in raw["transcription"]:
         text = normalize(item["text"])
