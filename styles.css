@@ -158,6 +158,7 @@ h2 { font-size: clamp(22px, 3.2vw, 30px); }
   font-size: 15px;
   text-decoration: none;
   box-shadow: 0 6px 18px rgba(0, 0, 0, .18);
+  z-index: 10;
 }
 .footer { padding: 24px 16px 72px; color: var(--muted); text-align: center; font-size: 14px; }
 
@@ -241,3 +242,49 @@ mark { background: #f3dfa2; color: inherit; padding: 0 1px; }
   .sheet th, .sheet td { display: block; padding: 2px 0; border: 0; }
   .sheet td::before { content: attr(data-label) "："; color: var(--muted); font-weight: 800; font-size: 13px; }
 }
+
+/* 逐字稿側欄目錄：寬螢幕固定在左側；手機版從左邊滑出 */
+.tlayout { width: min(1320px, calc(100vw - 32px)); margin: 0 auto; }
+.transcript-page { min-width: 0; }
+.tsidebar-head { display: flex; align-items: center; justify-content: space-between; gap: 8px; padding: 0 4px 10px; border-bottom: 1px solid var(--line); }
+.tsidebar-head strong { font-size: 16px; }
+.tsidebar-close { display: none; padding: 2px 10px; color: var(--muted); text-decoration: none; font-size: 18px; }
+.side-list { display: grid; gap: 2px; padding-top: 8px; }
+.side-link {
+  display: grid;
+  grid-template-columns: 2.2em minmax(0, 1fr);
+  gap: 6px;
+  padding: 7px 8px;
+  border-left: 3px solid transparent;
+  border-radius: 0 6px 6px 0;
+  color: var(--ink);
+  text-decoration: none;
+  font-size: 14px;
+  line-height: 1.5;
+}
+.side-link b { color: var(--accent); font-variant-numeric: tabular-nums; }
+.side-link small { display: block; color: var(--muted); font-size: 12px; font-variant-numeric: tabular-nums; }
+.side-link:hover { background: var(--paper-2); }
+.side-link.on { border-left-color: var(--warm); background: var(--warm-soft); }
+
+@media (min-width: 1100px) {
+  .tlayout { display: grid; grid-template-columns: 280px minmax(0, 1fr); gap: 32px; align-items: start; }
+  .tsidebar { position: sticky; top: 0; max-height: 100vh; overflow-y: auto; padding: 24px 4px 24px 0; }
+  .toc-toggle { display: none; }
+}
+@media (max-width: 1099px) {
+  .tsidebar {
+    position: fixed;
+    inset: 0 auto 0 0;
+    z-index: 30;
+    width: min(86vw, 340px);
+    padding: 16px 12px 24px;
+    overflow-y: auto;
+    background: var(--paper);
+    transform: translateX(-105%);
+    transition: transform .22s ease;
+  }
+  .tsidebar:target, .tsidebar.open { transform: none; box-shadow: 0 0 0 100vmax rgba(38, 35, 31, .35); }
+  .tsidebar-close { display: inline-block; }
+}
+@media (prefers-reduced-motion: reduce) { .tsidebar { transition: none; } }
